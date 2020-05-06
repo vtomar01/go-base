@@ -20,7 +20,7 @@ type (
 		nopts natn.Options
 
 		logger      log.Logger
-		subscribers []subscriber
+		subscribers []Subscriber
 
 		closeCh chan struct{}
 	}
