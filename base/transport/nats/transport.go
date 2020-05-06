@@ -5,6 +5,7 @@ import (
 	"errors"
 	natn "github.com/nats-io/nats.go"
 	"github.com/vtomar01/go-base/base/log"
+	"sync"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type (
 
 	// Transport is transport server for natn.IO connection
 	Transport struct {
+		mu    sync.Mutex
 		flush time.Duration
 
 		conn  *natn.Conn
@@ -88,6 +90,22 @@ func (tr *Transport) Subscribe(
 		return err
 	}
 	tr.subscribers[s.id] = s
+	return nil
+}
+
+func (tr *Transport) Unsubscribe(id string) error {
+	tr.mu.Lock()
+	defer tr.mu.Unlock()
+
+	s, ok := tr.subscribers[id]
+	if !ok {
+		return nil
+	}
+	err := s.close()
+	if err != nil {
+		return err
+	}
+	delete(tr.subscribers, id)
 	return nil
 }
 
