@@ -20,7 +20,7 @@ type (
 		nopts natn.Options
 
 		logger      log.Logger
-		subscribers []*Subscriber
+		subscribers map[string]*Subscriber
 
 		closeCh chan struct{}
 	}
@@ -73,7 +73,11 @@ func WithLogging(logger log.Logger) TransportOption {
 }
 
 func (tr *Transport) Subscribers() []*Subscriber {
-	return tr.subscribers
+	var ss []*Subscriber
+	for _, s := range tr.subscribers {
+		ss = append(ss, s)
+	}
+	return ss
 }
 
 func (tr *Transport) Subscribe(
@@ -83,7 +87,7 @@ func (tr *Transport) Subscribe(
 	if err != nil {
 		return err
 	}
-	tr.subscribers = append(tr.subscribers, s)
+	tr.subscribers[s.id] = s
 	return nil
 }
 

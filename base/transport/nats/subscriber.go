@@ -50,12 +50,6 @@ type (
 	SubscriberOption func(*Subscriber)
 )
 
-func WithQGroupSubscriberOption(qGroup string) SubscriberOption {
-	return func(s *Subscriber) {
-		s.qGroup = qGroup
-	}
-}
-
 func (s *Subscriber) Id() string {
 	return s.id
 }
@@ -70,6 +64,18 @@ func (s *Subscriber) Group() string {
 
 func (s *Subscriber) IsValid() bool {
 	return s.subscription.IsValid()
+}
+
+func WithQGroupSubscriberOption(qGroup string) SubscriberOption {
+	return func(s *Subscriber) {
+		s.qGroup = qGroup
+	}
+}
+
+func WithId(id string) SubscriberOption {
+	return func(s *Subscriber) {
+		s.id = id
+	}
 }
 
 func WithSubjectSubscriberOption(sub string) SubscriberOption {
