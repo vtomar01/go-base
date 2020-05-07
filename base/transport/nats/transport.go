@@ -182,8 +182,9 @@ func NewTransport(
 ) (*Transport, error) {
 
 	tr := Transport{
-		nopts:   natn.GetDefaultOptions(),
-		closeCh: closeCh,
+		nopts:       natn.GetDefaultOptions(),
+		closeCh:     closeCh,
+		subscribers: make(map[string]*Subscriber),
 	}
 
 	for _, o := range options {
