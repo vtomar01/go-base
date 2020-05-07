@@ -41,6 +41,7 @@ type (
 		afters   []AfterFunc
 		errorEnc ErrorEncoder
 		errorhn  ErrorHandler
+		conn     *natn.Conn
 
 		subscription *natn.Subscription
 		options      []kitn.SubscriberOption
@@ -63,7 +64,7 @@ func (s *Subscriber) Group() string {
 }
 
 func (s *Subscriber) IsValid() bool {
-	return s.subscription.IsValid()
+	return s.subscription != nil && s.subscription.IsValid()
 }
 
 func WithQGroupSubscriberOption(qGroup string) SubscriberOption {
@@ -137,20 +138,20 @@ func WithErrorhandlerSubscriberOption(e ErrorHandler) SubscriberOption {
 	}
 }
 
-func (s *Subscriber) open(con *natn.Conn) error {
+func (s *Subscriber) open() error {
 
 	var err error
 	if len(s.qGroup) > 0 {
-		s.subscription, err = con.QueueSubscribe(
+		s.subscription, err = s.conn.QueueSubscribe(
 			s.subject,
 			s.qGroup,
-			s.ServeMsg(con),
+			s.ServeMsg(s.conn),
 		)
 		s.subscription.IsValid()
 	} else {
-		s.subscription, err = con.Subscribe(
+		s.subscription, err = s.conn.Subscribe(
 			s.subject,
-			s.ServeMsg(con),
+			s.ServeMsg(s.conn),
 		)
 	}
 
@@ -163,10 +164,11 @@ func (s *Subscriber) close() error {
 
 func newSubscriber(
 	logger log.Logger,
+	con *natn.Conn,
 	options ...SubscriberOption,
 ) (*Subscriber, error) {
 
-	var s Subscriber
+	s := Subscriber{conn: con}
 
 	for _, o := range options {
 		o(&s)

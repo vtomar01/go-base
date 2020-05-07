@@ -15,6 +15,7 @@ type (
 
 	// Transport is transport server for natn.IO connection
 	Transport struct {
+		open  bool
 		mu    sync.Mutex
 		flush time.Duration
 
@@ -85,10 +86,19 @@ func (tr *Transport) Subscribers() []*Subscriber {
 func (tr *Transport) Subscribe(
 	options ...SubscriberOption,
 ) (*Subscriber, error) {
-	s, err := newSubscriber(tr.logger, options...)
+
+	s, err := newSubscriber(tr.logger, tr.conn, options...)
 	if err != nil {
 		return nil, err
 	}
+
+	if tr.open {
+		err := s.open()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	tr.subscribers[s.id] = s
 	return s, nil
 }
@@ -111,7 +121,7 @@ func (tr *Transport) Unsubscribe(id string) error {
 
 func (tr *Transport) Publisher(
 	options ...PublisherOption,
-) *Publisher {
+) (*Publisher, error) {
 	return NewPublisher(tr.conn, options...)
 }
 
@@ -119,11 +129,12 @@ func (tr *Transport) Publisher(
 func (tr *Transport) Open() error {
 
 	for _, sub := range tr.subscribers {
-		err := sub.open(tr.conn)
+		err := sub.open()
 		if err != nil {
 			return err
 		}
 	}
+	tr.open = true
 	return nil
 }
 
