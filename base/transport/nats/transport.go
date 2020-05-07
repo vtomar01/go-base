@@ -84,13 +84,13 @@ func (tr *Transport) Subscribers() []*Subscriber {
 
 func (tr *Transport) Subscribe(
 	options ...SubscriberOption,
-) error {
+) (*Subscriber, error) {
 	s, err := newSubscriber(tr.logger, options...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	tr.subscribers[s.id] = s
-	return nil
+	return s, nil
 }
 
 func (tr *Transport) Unsubscribe(id string) error {
