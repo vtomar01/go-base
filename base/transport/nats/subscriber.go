@@ -147,7 +147,6 @@ func (s *Subscriber) open() error {
 			s.qGroup,
 			s.ServeMsg(s.conn),
 		)
-		s.subscription.IsValid()
 	} else {
 		s.subscription, err = s.conn.Subscribe(
 			s.subject,
