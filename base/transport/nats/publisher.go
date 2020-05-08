@@ -61,7 +61,7 @@ func (p *Publisher) Publish(
 	request interface{},
 ) (interface{}, error) {
 
-	return p.Publish(ctx, subject, request)
+	return p.publish(ctx, subject, request)
 }
 
 func (p *Publisher) publish(
